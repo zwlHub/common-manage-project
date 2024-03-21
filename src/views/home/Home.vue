@@ -15,7 +15,7 @@
         </div>
       </el-card>
       <el-card shadow="hover" style="margin-top: 20px" height="450px">
-        <el-table :data="tableData" >
+        <el-table :data="tableData">
           <el-table-column
             v-for="(val, key) in tableLabel"
             :key="key"
@@ -25,12 +25,30 @@
         </el-table>
       </el-card>
     </el-col>
-    <el-col :span="16" style="margin-top: 20px"></el-col>
+    <el-col :span="16" style="margin-top: 20px">
+      <div class="num">
+        <el-card
+          :body-style="{ display: 'flex', padding: 0 }"
+          v-for="item in countData"
+          :key="item.name"
+        >
+          <component
+            class="icons"
+            :is="item.icon"
+            :style="{ background: item.color }"
+          ></component>
+          <div class="detail">
+            <p class="num">￥{{ item.value }}</p>
+            <p class="txt">{{ item.name }}</p>
+          </div>
+        </el-card>
+      </div>
+    </el-col>
   </el-row>
 </template>
 
 <script>
-import { ref,onMounted, getCurrentInstance } from 'vue'
+import { ref, onMounted, getCurrentInstance } from 'vue'
 
 export default {
   setup() {
@@ -44,15 +62,23 @@ export default {
     const { proxy } = getCurrentInstance()
     const getTableList = async () => {
       let res = await proxy.$api.getTableData()
-      tableData.value = res.tableData
+      tableData.value = res
+    }
+    // 右侧数据
+    const countData = ref()
+    const getCountData = async () => {
+      let res = await proxy.$api.getCountData()
+      countData.value = res
     }
     // 挂载之前
     onMounted(() => {
       getTableList()
+      getCountData()
     })
     return {
       tableData,
-      tableLabel
+      tableLabel,
+      countData
     }
   }
 }
@@ -82,6 +108,38 @@ export default {
     span {
       color: #666;
       margin-left: 60px;
+    }
+  }
+  .num {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    .el-card {
+      width: 32%;
+      margin-bottom: 20px;
+    }
+    .icons {
+      width: 80px;
+      height: 80px;
+      font-size: 30px;
+      text-align: center;
+      line-height: 80px;
+      color: #fff;
+    }
+    .detail {
+      margin-left: 15px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      .num {
+        font-size: 30px;
+        margin-bottom: 10px;
+      }
+      .txt {
+        font-size: 14px;
+        text-align: center;
+        color: #999;
+      }
     }
   }
 }
